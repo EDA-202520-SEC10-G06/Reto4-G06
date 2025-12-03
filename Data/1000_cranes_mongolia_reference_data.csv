@@ -1,0 +1,21 @@
+tag-id,animal-id,animal-taxon,deploy-on-date,deploy-off-date,animal-latest-date-born,animal-ring-id,animal-sex,attachment-comments,deployment-id,manipulation-type,tag-manufacturer-name,tag-mass,tag-model,tag-production-date,tag-readout-method,tag-serial-no
+6311,H31-6311,Anthropoides virgo,2018-07-30 00:00:00.000,,2018-06-15 00:00:00.000,H31,u,mounted on ELSA Demoiselle ring,H31-6311,none,University of Konstanz,20.0,20g GPS GSM,2018,phone-network,6311
+6332,H20-6332,Anthropoides virgo,2018-07-30 00:00:00.000,,2018-06-15 00:00:00.000,H20,u,mounted on ELSA Demoiselle ring,H20-6332,none,University of Konstanz,20.0,20g GPS GSM,2018,phone-network,6332
+6272,H23-6272,Anthropoides virgo,2018-07-30 00:00:00.000,,2018-06-15 00:00:00.000,H23,u,mounted on ELSA Demoiselle ring,H23-6272,none,University of Konstanz,20.0,20g GPS GSM,2018,phone-network,6272
+6282,H25-6282,Anthropoides virgo,2018-07-30 00:00:00.000,,2018-06-15 00:00:00.000,H25,u,mounted on ELSA Demoiselle ring,H25-6282,none,University of Konstanz,20.0,20g GPS GSM,2018,phone-network,6282
+6239,H24-6239,Anthropoides virgo,2018-07-30 00:00:00.000,,2018-06-15 00:00:00.000,H24,u,mounted on ELSA Demoiselle ring,H24-6239,none,University of Konstanz,20.0,20g GPS GSM,2018,phone-network,6239
+6269,H29-6269,Anthropoides virgo,2018-07-31 00:00:00.000,,2018-06-15 00:00:00.000,H29,u,mounted on ELSA Demoiselle ring,H29-6269,none,University of Konstanz,20.0,20g GPS GSM,2018,phone-network,6269
+6327,H34-6327,Anthropoides virgo,2018-08-01 00:00:00.000,,2018-06-15 00:00:00.000,H34,u,mounted on ELSA Demoiselle ring,H34-6327,none,University of Konstanz,20.0,20g GPS GSM,2018,phone-network,6327
+6233,H33-6233,Anthropoides virgo,2018-08-01 00:00:00.000,,2018-06-15 00:00:00.000,H33,u,mounted on ELSA Demoiselle ring,H33-6233,none,University of Konstanz,20.0,20g GPS GSM,2018,phone-network,6233
+6283,H12-6283,Anthropoides virgo,2018-08-04 00:00:00.000,,2018-06-15 00:00:00.000,H12,u,mounted on ELSA Demoiselle ring,H12-6283,none,University of Konstanz,20.0,20g GPS GSM,2018,phone-network,6283
+6292,H14-6292,Anthropoides virgo,2018-08-04 00:00:00.000,,2018-06-15 00:00:00.000,H14,u,mounted on ELSA Demoiselle ring,H14-6292,none,University of Konstanz,20.0,20g GPS GSM,2018,phone-network,6292
+6280,H13-6280,Anthropoides virgo,2018-08-04 00:00:00.000,2023-10-21 00:00:00.000,2018-06-15 00:00:00.000,H13,u,mounted on ELSA Demoiselle ring,H13-6280,none,University of Konstanz,20.0,20g GPS GSM,2018,phone-network,6280
+6237,H71-6237,Anthropoides virgo,2018-08-05 00:00:00.000,,2018-06-15 00:00:00.000,H71,u,mounted on ELSA Demoiselle ring,H71-6237,none,University of Konstanz,20.0,20g GPS GSM,2018,phone-network,6237
+6290,H19-6290,Anthropoides virgo,2018-08-05 00:00:00.000,,2018-06-15 00:00:00.000,H19,u,mounted on ELSA Demoiselle ring,H19-6290,none,University of Konstanz,20.0,20g GPS GSM,2018,phone-network,6290
+6295,H18-6295,Anthropoides virgo,2018-08-05 00:00:00.000,,2018-06-15 00:00:00.000,H18,u,mounted on ELSA Demoiselle ring,H18-6295,none,University of Konstanz,20.0,20g GPS GSM,2018,phone-network,6295
+6330,H17-6330,Anthropoides virgo,2018-08-05 00:00:00.000,,2018-06-15 00:00:00.000,H17,u,mounted on ELSA Demoiselle ring,H17-6330,none,University of Konstanz,20.0,20g GPS GSM,2018,phone-network,6330
+6231,H16-6231,Anthropoides virgo,2018-08-05 00:00:00.000,,2018-06-15 00:00:00.000,H16,u,mounted on ELSA Demoiselle ring,H16-6231,none,University of Konstanz,20.0,20g GPS GSM,2018,phone-network,6231
+6302,H70-6302,Anthropoides virgo,2018-08-05 00:00:00.000,,2018-06-15 00:00:00.000,H70,u,mounted on ELSA Demoiselle ring,H70-6302,none,University of Konstanz,20.0,20g GPS GSM,2018,phone-network,6302
+6328,H72-6328,Anthropoides virgo,2018-08-05 00:00:00.000,,2018-06-15 00:00:00.000,H72,u,mounted on ELSA Demoiselle ring,H72-6328,none,University of Konstanz,20.0,20g GPS GSM,2018,phone-network,6328
+6235,H78-6235,Anthropoides virgo,2018-08-07 00:00:00.000,,2018-06-15 00:00:00.000,H78,u,mounted on ELSA Demoiselle ring,H78-6235,none,University of Konstanz,20.0,20g GPS GSM,2018,phone-network,6235
+332,,,,,,,,,,,,,,,,
