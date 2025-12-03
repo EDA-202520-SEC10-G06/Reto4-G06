@@ -1,5 +1,7 @@
 import sys
-
+from tabulate import tabulate # type: ignore
+import App.logic as lg
+import os
 
 def new_logic():
     """
