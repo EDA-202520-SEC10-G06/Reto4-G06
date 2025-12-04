@@ -348,7 +348,7 @@ def print_req_3(control):
     print("Requerimiento 3"+
           "\nTotal de puntos en la ruta: "+str(res["total_puntos"])+
           "\nTotal de individuos en la ruta: "+str(res["total_individuos"])+
-          "\nTiempo de ejecución: "+str(res["time"])+" ms.")
+          "\nTiempo de ejecución: "+str(res["tiempo_ms"])+" ms.")
     
     def table(lista):
         headers = ["ID Punto",
@@ -382,7 +382,7 @@ def print_req_3(control):
     
     print("\nUltimos 5:\n")
     print(table(res["ultimos_5"]))
-    pass
+    
 
 
 def print_req_4(control):
@@ -561,10 +561,67 @@ def print_req_5(control):
 
 def print_req_6(control):
     """
-        Función que imprime la solución del Requerimiento 6 en consola
+    Imprime la solución del Requerimiento 6 en formato textual estilo reporte.
     """
-    # TODO: Imprimir el resultado del requerimiento 6
-    pass
+    res = lg.req_6(control)
+
+    print("\n==========  REQUERIMIENTO 6: SUBREDES HÍDRICAS  ==========\n")
+
+    if res is None or res["total_subredes"] == 0:
+        print("No fue posible identificar subredes hídricas en el grafo.")
+        return
+
+    print(f"Total de subredes hídricas identificadas: {res['total_subredes']}\n")
+    print(f"Mostrando las 5 subredes más grandes (o menos si no existen 5):\n")
+
+    for sub in res["subredes_top"]:
+        print(f"----- Subred {sub['id_subred']} -----")
+        print(f"- Latitud mínima: {sub['lat_min']}")
+        print(f"- Latitud máxima: {sub['lat_max']}")
+        print(f"- Longitud mínima: {sub['lon_min']}")
+        print(f"- Longitud máxima: {sub['lon_max']}")
+        print(f"- Total puntos migratorios: {sub['num_puntos']}")
+        print(f"- Total individuos identificados: {sub['num_individuos']}\n")
+
+        # ---- Primeros puntos ----
+        print("Primeros 3 puntos migratorios:")
+        if len(sub["primeros_puntos"]) == 0:
+            print("  * No disponibles")
+        else:
+            for p in sub["primeros_puntos"]:
+                print(f"  * ID: {p['id']}, lat: {p['latitud']}, lon: {p['longitud']}")
+        print()
+
+        # ---- Últimos puntos ----
+        print("Últimos 3 puntos migratorios:")
+        if len(sub["ultimos_puntos"]) == 0:
+            print("  * No disponibles")
+        else:
+            for p in sub["ultimos_puntos"]:
+                print(f"  * ID: {p['id']}, lat: {p['latitud']}, lon: {p['longitud']}")
+        print()
+
+        # ---- Primeros individuos ----
+        print("Primeros 3 individuos (tags):")
+        if len(sub["primeros_individuos"]) == 0:
+            print("  * No disponibles")
+        else:
+            for ind in sub["primeros_individuos"]:
+                print(f"  * {ind}")
+        print()
+
+        # ---- Últimos individuos ----
+        print("Últimos 3 individuos (tags):")
+        if len(sub["ultimos_individuos"]) == 0:
+            print("  * No disponibles")
+        else:
+            for ind in sub["ultimos_individuos"]:
+                print(f"  * {ind}")
+        print("------------------------------------------------------------\n")
+
+    print(f"Tiempo de ejecución: {res['tiempo_ms']:.3f} ms.\n")
+
+
 
 # Se crea la lógica asociado a la vista
 control = new_logic()
@@ -597,7 +654,7 @@ def main():
         elif int(inputs) == 5:
             print_req_5(control)
 
-        elif int(inputs) == 5:
+        elif int(inputs) == 6:
             print_req_6(control)
 
         elif int(inputs) == 7:
