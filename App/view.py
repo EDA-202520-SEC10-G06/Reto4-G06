@@ -5,10 +5,10 @@ import os
 
 def new_logic():
     """
-        Se crea una instancia del controlador
+        Se crea una instancia del controlador (catálogo de datos)
     """
-    #TODO: Llamar la función de la lógica donde se crean las estructuras de datos
-    pass
+    return lg.new_logic()
+
 
 def print_menu():
     print("Bienvenido")
@@ -23,18 +23,129 @@ def print_menu():
 
 def load_data(control):
     """
-    Carga los datos
+    Vista: carga los datos eligiendo uno de los datasets disponibles.
+    No pide el nombre del archivo, muestra un menú de selección.
     """
-    #TODO: Realizar la carga de datos
-    pass
 
+    print("""
+=== SELECCIONE EL DATASET A CARGAR ===
 
-def print_data(control, id):
+1 - 1000_cranes_mongolia_small.csv
+2 - 1000_cranes_mongolia_30pct.csv
+3 - 1000_cranes_mongolia_80pct.csv
+4 - 1000_cranes_mongolia_large.csv
+""")
+
+    opcion = input("Ingrese la opción deseada: ")
+
+    if opcion == "1":
+        file = "1000_cranes_mongolia_small.csv"
+    elif opcion == "2":
+        file = "1000_cranes_mongolia_30pct.csv"
+    elif opcion == "3":
+        file = "1000_cranes_mongolia_80pct.csv"
+    elif opcion == "4":
+        file = "1000_cranes_mongolia_large.csv"
+    else:
+        print("Opción inválida. Intente de nuevo.\n")
+        return
+
+    print(f"\nCargando dataset: {file} ...\n")
+
+    start_time = lg.get_time()
+    lg.load_data(control, file)
+    end_time = lg.get_time()
+    elapsed = lg.delta_time(start_time, end_time)
+
+    print_data(control, elapsed)
+
+def print_data(control, elapsed):
     """
-        Función que imprime un dato dado su ID
+    Vista: imprime el resumen de la carga de datos conforme al PDF.
+    Muestra:
+      - Total de grullas
+      - Total de eventos
+      - Total de nodos
+      - Total de arcos en cada grafo
+      - Primeros y últimos 5 nodos creados
     """
-    #TODO: Realizar la función para imprimir un elemento
-    pass
+
+    info = lg.get_load_info(control)
+
+    print("\n===== CARGA DE DATOS =====\n")
+    print(f"Tiempo de carga: {elapsed:.3f} ms\n")
+
+    print(f"Total de grullas reconocidas en el estudio: {info['total_grullas']}")
+    print(f"Total de eventos cargados durante el estudio: {info['total_eventos']}")
+    print(f"Total de nodos (vértices) del grafo: {info['total_nodos']}")
+    print(f"Total de arcos en el grafo de movimientos: {info['total_arcos_mov']}")
+    print(f"Total de arcos en el grafo de proximidad a fuentes hídricas: {info['total_arcos_agua']}\n")
+
+    # Primeros 5 nodos
+    print("--- Primeros 5 nodos creados ---")
+    primeros = info.get("primeros_5", [])
+    if len(primeros) == 0:
+        print("No hay nodos para mostrar.")
+    else:
+        rows_prim = []
+        i = 0
+        while i < len(primeros):
+            v = primeros[i]
+            pos_str = f"({v['lat']}, {v['lon']})"
+            fecha_str = str(v["fecha"])
+            tags_str = ", ".join(v["tags"])
+            rows_prim.append([
+                v["id"],
+                pos_str,
+                fecha_str,
+                tags_str,
+                v["num_eventos"],
+                f"{v['dist_agua_prom_km']:.4f}",
+            ])
+            i += 1
+
+        headers_prim = [
+            "Id vértice",
+            "Posición (lat, lon)",
+            "Fecha de creación",
+            "Grullas (tags)",
+            "Conteo de eventos",
+            "Dist. prom. agua (km)",
+        ]
+        print(tabulate(rows_prim, headers=headers_prim, tablefmt="grid"))
+
+    # Últimos 5 nodos
+    print("\n--- Últimos 5 nodos creados ---")
+    ultimos = info.get("ultimos_5", [])
+    if len(ultimos) == 0:
+        print("No hay nodos para mostrar.")
+    else:
+        rows_ult = []
+        j = 0
+        while j < len(ultimos):
+            v = ultimos[j]
+            pos_str = f"({v['lat']}, {v['lon']})"
+            fecha_str = str(v["fecha"])
+            tags_str = ", ".join(v["tags"])
+            rows_ult.append([
+                v["id"],
+                pos_str,
+                fecha_str,
+                tags_str,
+                v["num_eventos"],
+                f"{v['dist_agua_prom_km']:.4f}",
+            ])
+            j += 1
+
+        headers_ult = [
+            "Id vértice",
+            "Posición (lat, lon)",
+            "Fecha de creación",
+            "Grullas (tags)",
+            "Conteo de eventos",
+            "Dist. prom. agua (km)",
+        ]
+        print(tabulate(rows_ult, headers=headers_ult, tablefmt="grid"))
 
 def print_req_1(control):
     """
@@ -46,10 +157,127 @@ def print_req_1(control):
 
 def print_req_2(control):
     """
-        Función que imprime la solución del Requerimiento 2 en consola
+    Vista del Requerimiento 2.
+    Pide los parámetros al usuario, llama a la lógica y muestra los resultados.
     """
-    # TODO: Imprimir el resultado del requerimiento 2
-    pass
+
+    # Entrada de datos
+    lat_origen = input("Ingrese la latitud del punto de origen: ")
+    lon_origen = input("Ingrese la longitud del punto de origen: ")
+    lat_destino = input("Ingrese la latitud del punto de destino: ")
+    lon_destino = input("Ingrese la longitud del punto de destino: ")
+    radio_km = input("Ingrese el radio del área de interés (km): ")
+
+    # Medir tiempo de ejecución
+    start_time = lg.get_time()
+    result = lg.req_2(control, lat_origen, lon_origen, lat_destino, lon_destino, radio_km)
+    end_time = lg.get_time()
+    elapsed = lg.delta_time(start_time, end_time)
+
+    print("\n===== Requerimiento 2 =====\n")
+
+    # Verificar si hay camino o si hubo problema
+    if not result.get("hay_camino", False):
+        print("No fue posible encontrar un camino entre los puntos especificados.")
+        mensaje = result.get("mensaje", None)
+        if mensaje is not None:
+            print("Detalle:", mensaje)
+        print(f"\nTiempo de ejecución: {elapsed:.3f} ms\n")
+        return
+
+    # Resumen general
+    print(f"Vértice de origen más cercano: {result['origen_id']}")
+    print(f"Vértice de destino más cercano: {result['destino_id']}")
+    print(f"Número de vértices en el camino: {result['num_vertices_camino']}")
+    print(f"Distancia total recorrida (según grafo de movimiento): {result['distancia_total_km']:.3f} km")
+
+    ultimo = result.get("ultimo_dentro_radio", None)
+    if ultimo is None:
+        print("Ningún vértice del camino quedó dentro del radio especificado.")
+    else:
+        print(
+            "Último vértice del camino dentro del radio:",
+            ultimo["id"],
+            f"– distancia al origen: {ultimo['distancia_al_origen_km']:.3f} km"
+        )
+
+    print("\n--- Primeros 5 vértices del camino ---")
+    primeros = result.get("primeros_5", [])
+    if len(primeros) == 0:
+        print("No hay vértices para mostrar.")
+    else:
+        rows_prim = []
+        i = 0
+        while i < len(primeros):
+            v = primeros[i]
+            tags_ini = ", ".join(v["tags_primeros"])
+            tags_fin = ", ".join(v["tags_ultimos"])
+            dist_sig = v["dist_siguiente_km"]
+            if dist_sig is None:
+                dist_sig_str = "N/A"
+            else:
+                dist_sig_str = f"{float(dist_sig):.3f}"
+            rows_prim.append([
+                v["id"],
+                v["latitud"],
+                v["longitud"],
+                v["num_individuos"],
+                tags_ini,
+                tags_fin,
+                dist_sig_str,
+            ])
+            i += 1
+
+        headers = [
+            "Id vértice",
+            "Latitud",
+            "Longitud",
+            "# individuos",
+            "Primeros tags",
+            "Últimos tags",
+            "Dist. al sig. (km)"
+        ]
+        print(tabulate(rows_prim, headers=headers, tablefmt="grid"))
+
+    print("\n--- Últimos 5 vértices del camino ---")
+    ultimos = result.get("ultimos_5", [])
+    if len(ultimos) == 0:
+        print("No hay vértices para mostrar.")
+    else:
+        rows_ult = []
+        j = 0
+        while j < len(ultimos):
+            v = ultimos[j]
+            tags_ini = ", ".join(v["tags_primeros"])
+            tags_fin = ", ".join(v["tags_ultimos"])
+            dist_sig = v["dist_siguiente_km"]
+            if dist_sig is None:
+                dist_sig_str = "N/A"
+            else:
+                dist_sig_str = f"{float(dist_sig):.3f}"
+            rows_ult.append([
+                v["id"],
+                v["latitud"],
+                v["longitud"],
+                v["num_individuos"],
+                tags_ini,
+                tags_fin,
+                dist_sig_str,
+            ])
+            j += 1
+
+        headers = [
+            "Id vértice",
+            "Latitud",
+            "Longitud",
+            "# individuos",
+            "Primeros tags",
+            "Últimos tags",
+            "Dist. al sig. (km)"
+        ]
+        print(tabulate(rows_ult, headers=headers, tablefmt="grid"))
+
+    print(f"\nTiempo de ejecución: {elapsed:.3f} ms\n")
 
 
 def print_req_3(control):
@@ -70,10 +298,120 @@ def print_req_4(control):
 
 def print_req_5(control):
     """
-        Función que imprime la solución del Requerimiento 5 en consola
+    Vista del Requerimiento 5.
+    Pide los parámetros al usuario, llama a la lógica y muestra los resultados.
     """
-    # TODO: Imprimir el resultado del requerimiento 5
-    pass
+
+    # Entrada de datos
+    lat_origen = input("Ingrese la latitud del punto de origen: ")
+    lon_origen = input("Ingrese la longitud del punto de origen: ")
+    lat_destino = input("Ingrese la latitud del punto de destino: ")
+    lon_destino = input("Ingrese la longitud del punto de destino: ")
+    print('Criterio de optimización (por ejemplo "distancia" o "agua")')
+    criterio = input("Ingrese el criterio: ")
+
+    # Medir tiempo de ejecución
+    start_time = lg.get_time()
+    result = lg.req_5(control, lat_origen, lon_origen, lat_destino, lon_destino, criterio)
+    end_time = lg.get_time()
+    elapsed = lg.delta_time(start_time, end_time)
+
+    print("\n===== Requerimiento 5 =====\n")
+
+    if not result.get("hay_camino", False):
+        print("No fue posible encontrar una ruta mínima entre los puntos especificados.")
+        mensaje = result.get("mensaje", None)
+        if mensaje is not None:
+            print("Detalle:", mensaje)
+        print(f"\nTiempo de ejecución: {elapsed:.3f} ms\n")
+        return
+
+    print(f"Grafo utilizado: {result['tipo_grafo']}")
+    print(f"Vértice de origen más cercano: {result['origen_id']}")
+    print(f"Vértice de destino más cercano: {result['destino_id']}")
+    print(f"Número de vértices en el camino: {result['num_vertices_camino']}")
+    print(f"Número de arcos en el camino: {result['num_arcos_camino']}")
+    print(f"Costo total de la ruta (según criterio): {result['costo_total']:.3f}\n")
+
+    # Primeros 5 vértices
+    print("--- Primeros 5 vértices del camino ---")
+    primeros = result.get("primeros_5", [])
+    if len(primeros) == 0:
+        print("No hay vértices para mostrar.")
+    else:
+        rows_prim = []
+        i = 0
+        while i < len(primeros):
+            v = primeros[i]
+            tags_ini = ", ".join(v["tags_primeros"])
+            tags_fin = ", ".join(v["tags_ultimos"])
+            dist_sig = v["dist_siguiente_km"]
+            if dist_sig is None:
+                dist_sig_str = "N/A"
+            else:
+                dist_sig_str = f"{float(dist_sig):.3f}"
+            rows_prim.append([
+                v["id"],
+                v["latitud"],
+                v["longitud"],
+                v["num_individuos"],
+                tags_ini,
+                tags_fin,
+                dist_sig_str,
+            ])
+            i += 1
+
+        headers = [
+            "Id vértice",
+            "Latitud",
+            "Longitud",
+            "# individuos",
+            "Primeros tags",
+            "Últimos tags",
+            "Dist. al sig. (km)"
+        ]
+        print(tabulate(rows_prim, headers=headers, tablefmt="grid"))
+
+    # Últimos 5 vértices
+    print("\n--- Últimos 5 vértices del camino ---")
+    ultimos = result.get("ultimos_5", [])
+    if len(ultimos) == 0:
+        print("No hay vértices para mostrar.")
+    else:
+        rows_ult = []
+        j = 0
+        while j < len(ultimos):
+            v = ultimos[j]
+            tags_ini = ", ".join(v["tags_primeros"])
+            tags_fin = ", ".join(v["tags_ultimos"])
+            dist_sig = v["dist_siguiente_km"]
+            if dist_sig is None:
+                dist_sig_str = "N/A"
+            else:
+                dist_sig_str = f"{float(dist_sig):.3f}"
+            rows_ult.append([
+                v["id"],
+                v["latitud"],
+                v["longitud"],
+                v["num_individuos"],
+                tags_ini,
+                tags_fin,
+                dist_sig_str,
+            ])
+            j += 1
+
+        headers = [
+            "Id vértice",
+            "Latitud",
+            "Longitud",
+            "# individuos",
+            "Primeros tags",
+            "Últimos tags",
+            "Dist. al sig. (km)"
+        ]
+        print(tabulate(rows_ult, headers=headers, tablefmt="grid"))
+
+    print(f"\nTiempo de ejecución: {elapsed:.3f} ms\n")
 
 
 def print_req_6(control):
