@@ -387,6 +387,10 @@ def req_1(catalog, lat_o, lon_o, lat_d, lon_d, individuo):
     Retorna el resultado del requerimiento 1
     """
     #TODO: Modificar el requerimiento 1
+
+    start = get_time()
+
+
     graph = catalog["movement"]
 
     # 1. encontrar nodo origen y destino
@@ -440,12 +444,15 @@ def req_1(catalog, lat_o, lon_o, lat_d, lon_d, individuo):
         next_vid = al.get_element(path, i+1) if i+1 < total_pts else None
         ultimos.append(format_vertex(graph, vid, next_vid))
 
+    end = get_time()
+
     return {
         "primer_nodo_del_individuo": first_node,
         "distancia_total": dist_total,
         "total_puntos": total_pts,
         "primeros_5": primeros,
-        "ultimos_5": ultimos
+        "ultimos_5": ultimos,
+        "tiempo_ms": delta_time(start, end)
     }
 
 
@@ -658,6 +665,9 @@ def req_4(catalog, lat_o, lon_o):
     Retorna el resultado del requerimiento 5
     """
     #TODO: Modificar el requerimiento 4
+
+    start = get_time()
+
     graph = catalog["water"]
 
     # 1. nodo origen más cercano
@@ -701,12 +711,15 @@ def req_4(catalog, lat_o, lon_o):
     for i in range(max(0, len(lista_vertices) - 5), len(lista_vertices)):
         ultimos.append(format_vertex_r4(graph, lista_vertices[i]))
 
+    end = get_time()
+
     return {
         "total_puntos": total_pts,
         "total_individuos": total_individuos,
         "distancia_total": distancia_total,
         "primeros_5": primeros,
-        "ultimos_5": ultimos
+        "ultimos_5": ultimos,
+        "tiempo_ms": delta_time(start, end)
     }
 
 
