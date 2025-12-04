@@ -64,7 +64,8 @@ def print_req_3(control):
     
     print("Requerimiento 3"+
           "\nTotal de puntos en la ruta: "+str(res["total_puntos"])+
-          "\nTotal de individuos en la ruta: "+str(res["total_individuos"]))
+          "\nTotal de individuos en la ruta: "+str(res["total_individuos"])+
+          "\nTiempo de ejecución: "+str(res["time"])+" ms.")
     
     def table(lista):
         headers = ["ID Punto",

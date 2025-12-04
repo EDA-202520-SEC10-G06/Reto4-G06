@@ -157,6 +157,27 @@ def edges_graph_1(catalog):
         G.add_edge(catalog["movement"],A,B,peso)
     return catalog
 
+def peso_haversine(graph, u, v):
+    Vu = G.get_vertex(graph, u)
+    Vv = G.get_vertex(graph, v)
+    
+    if Vu == None or Vv == None:
+        return 0
+    
+    posU = Vu["value"]["Posicion"]
+    posV = Vv["value"]["Posicion"]
+    
+    if posU == None or posV == None:
+        return 0
+    
+    latu, lonu = posU
+    latv, lonv = posV
+
+    if None in (latu, lonu, latv, lonv):
+        return 0
+
+    return haversine(latu, lonu, latv, lonv)
+
 def edges_graph_2(catalog):
     dicc = {}
     for i in range(al.size(catalog["sorted_info"])):
@@ -439,6 +460,8 @@ def req_3(catalog):
     Retorna el resultado del requerimiento 3
     """
     # TODO: Modificar el requerimiento 3
+    start = time.process_time()
+    
     #Definición de la función de restricción 💔🥀
     def Topological_Sort(graph):
         #Defino variables que necesito
@@ -493,8 +516,7 @@ def req_3(catalog):
         
         for j in range(al.size(adjacents)):
             adjV = al.get_element(adjacents,j)
-            edge = G.get_edge(graph, vertex, adjV)
-            peso = edge["weight"] if edge else 0
+            peso = peso_haversine(graph, vertex, adjV)
             
             if dist[adjV] < dist[vertex] + peso:
                 dist[adjV] = dist[vertex] + peso
@@ -565,15 +587,15 @@ def req_3(catalog):
         dist1 = None
         if idx>0:
             prev_id = al.get_element(camino, idx - 1)
-            e = G.get_edge(graph, prev_id, vid)
-            dist1 = e["weight"] if e else "Unknown"
+            peso = peso_haversine(graph, prev_id, vid)
+            dist1 = peso if peso!=None else "Unknown"
         
         #Distancia al proximo
         dist2 = None
         if idx < totV-1:
             next_id = al.get_element(camino, idx + 1)
-            e = G.get_edge(graph, vid, next_id)
-            dist2 = e["weight"] if e else "Unknown"
+            peso = peso_haversine(graph, vid, next_id)
+            dist2 = peso if peso!=None else "Unknown"
         
         return{
             "punto_id": vid,
@@ -593,10 +615,14 @@ def req_3(catalog):
     for i in range(max(0, totV-5),totV):
         ultimos.append(formatealo(i))
     
+    end = time.process_time()
+    elapsed = delta_time(start,end)
+    
     return{"total_puntos": totV,
            "total_individuos": totIndiv,
            "primeros_5": primeros,
-           "ultimos_5": ultimos}
+           "ultimos_5": ultimos,
+           "time":elapsed}
     
 
 #ANEXA A REQ 4
