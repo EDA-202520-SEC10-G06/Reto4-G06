@@ -165,6 +165,36 @@ def get_vertex(my_graph, key_u):
     # Si no hay vertice, el get retorna None
     return mlp.get(my_graph["vertices"], key_u)
 
+def get_connection(my_graph, key_u, key_v):
+    Vu = mlp.get(my_graph["vertices"], key_u)
+    if Vu == None:
+        return None
+    
+    adj = Vu["adjacents"]
+    if adj == None:
+        return None
+    
+    edge = mlp.get(adj,key_v)
+    if edge == None:
+        return None
+    
+    return edge["value"]
+
+def get_edge(my_graph, key_u, key_v):
+    u = mlp.get(my_graph["vertices"], key_u)
+    if u == None:
+        return None
+    
+    Vu = u["value"]
+    
+    adj = Vu["adjacents"]
+    
+    edge = mlp.get(adj,key_v)
+    if edge == None:
+        return None
+      
+    return edge["value"]
+    
 
 def update_vertex_info(my_graph, key_u, new_info_u):
     """
