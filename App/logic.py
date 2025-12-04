@@ -205,6 +205,8 @@ def edges_graph_2(catalog):
         G.add_edge(catalog["water"], A, B, peso)
     return catalog
 
+#ANEXAS QUE DE PRONTO SIRVAN PARA LOS REQUERIMIENTOS
+
 def haversine(lat_a, lon_a, lat_b, lon_b):
     R = 6371
     lat_a, lon_a, lat_b, lon_b = map(math.radians, [lat_a, lon_a, lat_b, lon_b])
@@ -214,21 +216,218 @@ def haversine(lat_a, lon_a, lat_b, lon_b):
     c = 2 * math.asin(math.sqrt(a))
     return R * c
 
+def get_closest_vertex(catalog, lat, lon):
+    vertices = G.vertices(catalog["movement"])
+    min_dist = float("inf")
+    closest = None
+
+    for i in range(al.size(vertices)):
+        vid = al.get_element(vertices, i)
+        vertex = G.get_vertex(catalog["movement"], vid)
+        vlat, vlon = vertex["value"]["Posicion"]
+        d = haversine(float(lat), float(lon), float(vlat), float(vlon))
+        if d < min_dist:
+            min_dist = d
+            closest = vid
+
+    return closest
+
+def dfs_path(graph, source, target):
+    stack_ds = stack.new_stack()
+    visited = set()
+    parent = {}
+
+    stack.push(stack_ds, source)
+    visited.add(source)
+    parent[source] = None
+
+    while not stack.is_empty(stack_ds):
+        v = stack.pop(stack_ds)
+        if v == target:
+            break
+
+        adj = G.adjacents(graph, v)
+        for i in range(al.size(adj)):
+            nxt = al.get_element(adj, i)
+            if nxt not in visited:
+                visited.add(nxt)
+                parent[nxt] = v
+                stack.push(stack_ds, nxt)
+
+    # reconstrucción del camino
+    if target not in parent:
+        return None
+
+    path = al.new_list()
+    cur = target
+    while cur is not None:
+        al.add_first(path, cur)
+        cur = parent[cur]
+
+    return path
+
+def format_vertex(graph, vid, next_vid):
+    v = G.get_vertex(graph, vid)
+    val = v["value"]
+
+    lat, lon = val["Posicion"]
+    individuo_list = val["I_individuo"]
+    total = al.size(individuo_list)
+
+    primeros = []
+    ultimos = []
+
+    for i in range(min(3, total)):
+        primeros.append(al.get_element(individuo_list, i))
+
+    for i in range(max(0, total-3), total):
+        ultimos.append(al.get_element(individuo_list, i))
+
+    # distancia al siguiente
+    dist_next = "Unknown"
+    if next_vid is not None:
+        e = G.get_edge(graph, vid, next_vid)
+        if e:
+            dist_next = e["weight"]
+
+    return {
+        "punto_id": vid,
+        "latitud": lat,
+        "longitud": lon,
+        "num_individuos": total,
+        "primeros_3_individuos": primeros,
+        "ultimos_3_individuos": ultimos,
+        "distancia_siguiente": dist_next
+    }
+
+def prim_mst(graph, start):
+    num_vertices = al.size(G.vertices(graph))
+    visited = set()
+    parent = {}
+    dist = {}
+    pq_ds = pq.new_pq()
+
+    # Inicializar distancias
+    vertices = G.vertices(graph)
+    for i in range(al.size(vertices)):
+        vid = al.get_element(vertices, i)
+        dist[vid] = float("inf")
+        parent[vid] = None
+
+    dist[start] = 0
+    pq.insert(pq_ds, pqe.new_entry(start, 0))
+
+    while not pq.is_empty(pq_ds):
+        entry = pq.del_min(pq_ds)
+        u = entry["value"]
+
+        if u in visited:
+            continue
+        visited.add(u)
+
+        # recorrer adyacentes
+        adj = G.adjacents(graph, u)
+        for i in range(al.size(adj)):
+            v = al.get_element(adj, i)
+
+            # tratar aristas como NO DIRIGIDAS
+            edge = G.get_edge(graph, u, v)
+            if edge:
+                w = edge["weight"]
+                if v not in visited and w < dist[v]:
+                    dist[v] = w
+                    parent[v] = u
+                    pq.insert(pq_ds, pqe.new_entry(v, w))
+
+            # revisar arista inversa (v → u)
+            rev = G.get_edge(graph, v, u)
+            if rev:
+                w = rev["weight"]
+                if v not in visited and w < dist[v]:
+                    dist[v] = w
+                    parent[v] = u
+                    pq.insert(pq_ds, pqe.new_entry(v, w))
+
+    # si solo se visitó un nodo → no hay MST real
+    if len(visited) <= 1:
+        return None
+
+    return parent, dist, visited
+
+
+
 # Funciones de consulta sobre el catálogo
 
 
-def req_1(catalog):
+def req_1(catalog, lat_o, lon_o, lat_d, lon_d, individuo):
     """
     Retorna el resultado del requerimiento 1
     """
-    # TODO: Modificar el requerimiento 1
-    pass
+    #TODO: Modificar el requerimiento 1
+    graph = catalog["movement"]
+
+    # 1. encontrar nodo origen y destino
+    origen = get_closest_vertex(catalog, lat_o, lon_o)
+    destino = get_closest_vertex(catalog, lat_d, lon_d)
+
+    # 2. encontrar primer nodo donde aparece el individuo
+    vertices = G.vertices(graph)
+    first_node = "Unknown"
+    for i in range(al.size(vertices)):
+        vid = al.get_element(vertices, i)
+        v = G.get_vertex(graph, vid)
+        lista = v["value"]["I_individuo"]
+        for j in range(al.size(lista)):
+            if al.get_element(lista, j) == individuo:
+                first_node = vid
+                break
+        if first_node != "Unknown":
+            break
+
+    # 3. buscar camino con DFS
+    path = dfs_path(graph, origen, destino)
+    if path is None:
+        return {
+            "primer_nodo_del_individuo": first_node,
+            "mensaje": "No existe un camino viable entre los puntos"
+        }
+
+    total_pts = al.size(path)
+
+    # 4. calcular distancia total
+    dist_total = 0.0
+    for i in range(total_pts - 1):
+        A = al.get_element(path, i)
+        B = al.get_element(path, i+1)
+        e = G.get_edge(graph, A, B)
+        if e:
+            dist_total += e["weight"]
+
+    # 5. primeros 5 y últimos 5
+    primeros = []
+    ultimos = []
+
+    for i in range(min(5, total_pts)):
+        vid = al.get_element(path, i)
+        next_vid = al.get_element(path, i+1) if i+1 < total_pts else None
+        primeros.append(format_vertex(graph, vid, next_vid))
+
+    for i in range(max(0, total_pts-5), total_pts):
+        vid = al.get_element(path, i)
+        next_vid = al.get_element(path, i+1) if i+1 < total_pts else None
+        ultimos.append(format_vertex(graph, vid, next_vid))
+
+    return {
+        "primer_nodo_del_individuo": first_node,
+        "distancia_total": dist_total,
+        "total_puntos": total_pts,
+        "primeros_5": primeros,
+        "ultimos_5": ultimos
+    }
 
 
 def req_2(catalog):
-    """
-    Retorna el resultado del requerimiento 2
-    """
+
     # TODO: Modificar el requerimiento 2
     pass
 
@@ -240,13 +439,89 @@ def req_3(catalog):
     # TODO: Modificar el requerimiento 3
     pass
 
+#ANEXA A REQ 4
 
-def req_4(catalog):
+def format_vertex_r4(graph, vid):
+    v = G.get_vertex(graph, vid)
+    val = v["value"]
+
+    lat, lon = val["Posicion"]
+    individuos = val["I_individuo"]
+    total = al.size(individuos)
+
+    primeros = []
+    ultimos = []
+
+    for i in range(min(3, total)):
+        primeros.append(al.get_element(individuos, i))
+
+    for i in range(max(0, total - 3), total):
+        ultimos.append(al.get_element(individuos, i))
+
+    return {
+        "punto_id": vid,
+        "latitud": lat,
+        "longitud": lon,
+        "num_individuos": total,
+        "primeros_3_individuos": primeros,
+        "ultimos_3_individuos": ultimos
+    }   
+
+def req_4(catalog, lat_o, lon_o):
     """
-    Retorna el resultado del requerimiento 4
+    Retorna el resultado del requerimiento 5
     """
-    # TODO: Modificar el requerimiento 4
-    pass
+    #TODO: Modificar el requerimiento 4
+    graph = catalog["water"]
+
+    # 1. nodo origen más cercano
+    origen = get_closest_vertex(catalog, lat_o, lon_o)
+
+    # 2. correr Prim desde ese nodo
+    res = prim_mst(graph, origen)
+    if res is None:
+        return {"mensaje": "No existe red hídrica viable desde el punto dado"}
+
+    parent, dist, visited = res
+
+    # 3. calcular puntos, individuos y distancia total
+    total_pts = len(visited)
+    distancia_total = 0
+    individuos_set = set()
+
+    for v in visited:
+        d = dist[v]
+        if d != float("inf"):
+            distancia_total += d
+
+        vertex = G.get_vertex(graph, v)
+        lista = vertex["value"]["I_individuo"]
+
+        for i in range(al.size(lista)):
+            individuos_set.add(al.get_element(lista, i))
+
+    total_individuos = len(individuos_set)
+
+    # 4. convertir visited en lista ordenada para mostrar primeros/últimos
+    lista_vertices = list(visited)
+    lista_vertices.sort()  # orden alfabético para consistencia
+
+    primeros = []
+    ultimos = []
+
+    for i in range(min(5, len(lista_vertices))):
+        primeros.append(format_vertex_r4(graph, lista_vertices[i]))
+
+    for i in range(max(0, len(lista_vertices) - 5), len(lista_vertices)):
+        ultimos.append(format_vertex_r4(graph, lista_vertices[i]))
+
+    return {
+        "total_puntos": total_pts,
+        "total_individuos": total_individuos,
+        "distancia_total": distancia_total,
+        "primeros_5": primeros,
+        "ultimos_5": ultimos
+    }
 
 
 def req_5(catalog):
