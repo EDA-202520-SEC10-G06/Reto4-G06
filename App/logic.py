@@ -8,6 +8,8 @@ from datetime import datetime
 from DataStructures.List import single_linked_list as lt
 from DataStructures.Map import map_linear_probing as m
 from DataStructures.Graph import digraph as G
+from DataStructures.Graph import dfo as DFO
+from DataStructures.Stack import stack
 import csv
 
 import os
@@ -238,7 +240,165 @@ def req_3(catalog):
     Retorna el resultado del requerimiento 3
     """
     # TODO: Modificar el requerimiento 3
-    pass
+    #Definición de la función de restricción 💔🥀
+    def Topological_Sort(graph):
+        #Defino variables que necesito
+        dfo = DFO.dfs_modified(graph)
+        num_v = al.size(G.vertices(graph))
+        visitados = 0
+        marked = dfo["marked"]
+        keys = m.key_set(marked)
+        
+        
+        #Recorro las llaves
+        for i in range(al.size(keys)):
+            if m.get(marked, al.get_element(keys,i)) != None:
+                visitados +=1
+        
+        #Verifico que logró recorrer todo (que sea un DAG)
+        if visitados < num_v:
+            return None
+        
+        #Genera una lista que retornará el resultado del sort
+        res = al.new_list()
+        
+        #Recorro haciendo pop al reversepost (que ya en sí es el resultado pero alrevez)
+        while not stack.is_empty(dfo["reversepost"]):
+            v = stack.pop(dfo["reversepost"])
+            al.add_last(res,v)
+
+        return res
+    
+    #Código real del requerimiento 3
+    
+    #Ordeno los datos y reviso que hayan suficientes para ejecutar
+    graph = catalog["movement"]
+    ordenado = Topological_Sort(graph)
+    ordenado_size = al.size(ordenado)
+    if ordenado == None or ordenado_size == 0:
+        return None
+    
+    #Creo holders que van a contener la info solicitada (dist contiene vértices, parent contiene el vértice anterior al actual de dist)
+    dist = {}
+    parent = {}
+    #Recorro el ordenado y meto los datos en la estructura
+    for i in range(ordenado_size):
+        vertex = al.get_element(ordenado, i)
+        dist[vertex] = 0
+        parent[vertex] = None
+    
+    #Por cada vértice que tengam reviso los adyacentes para calcular las rutas más frecuentada (para definir ruta migratoria)
+    for i in range(ordenado_size):
+        vertex = al.get_element(ordenado, i)
+        adjacents = G.adjacents(graph, vertex)
+        
+        for j in range(al.size(adjacents)):
+            adjV = al.get_element(adjacents,j)
+            edge = G.get_edge(graph, vertex, adjV)
+            peso = edge["weight"] if edge else 0
+            
+            if dist[adjV] < dist[vertex] + peso:
+                dist[adjV] = dist[vertex] + peso
+                parent[adjV] = vertex
+    
+    #Busca el vértice final entre los ya seleccionados
+    endV = None
+    max_dist = -1
+    
+    for v in dist:
+        if dist[v] > max_dist:
+            max_dist = dist[v]
+            endV = v
+    
+    if endV == None:
+        return None
+
+    #Con el vértice final y los vértices más frecuentados puedo construir la ruta migratoria
+    camino = al.new_list()
+    current = endV
+    
+    while current != None:
+        al.add_first(camino, current)
+        current = parent[current]
+    
+    totV = al.size(camino)
+    if totV == 0:
+        return None
+    
+    #Calculo el total de individuos que utilizan la ruta migratoria
+    individuos_set= set()
+    for i in range(totV):
+        vid = al.get_element(camino, i)
+        vertex = G.get_vertex(graph, vid)
+        individuos = vertex["value"]["I_individuo"]
+        
+        for k in range(al.size(individuos)):
+            individuos_set.add(al.get_element(individuos, k))
+    
+    totIndiv = len(individuos_set)
+    
+    #Función para formatear datos del vértice
+    def formatealo(idx):
+        #Obtengo los datos
+        vid = al.get_element(camino, idx)
+        vertex=G.get_vertex(graph, vid)
+        val = vertex["value"]
+        primeros = []
+        ultimos = []
+        
+        lat, lon = val["Posicion"]
+        if lat == None:
+            lat = "Unknown"
+        if lon == None:
+            lon = "Unknown"
+        
+        individuos = val["I_individuo"]
+        totIndiv = al.size(individuos)
+        
+        #Comienso a formatear:
+        for i in range (min(3, totIndiv)):
+            primeros.append(al.get_element(individuos, i))
+        
+        for i in range (max(0, totIndiv-3), totIndiv):
+            ultimos.append(al.get_element(individuos, i))
+        
+        #Distancia al anterior
+        dist1 = None
+        if idx>0:
+            prev_id = al.get_element(camino, idx - 1)
+            e = G.get_edge(graph, prev_id, vid)
+            dist1 = e["weight"] if e else "Unknown"
+        
+        #Distancia al proximo
+        dist2 = None
+        if idx < totV-1:
+            next_id = al.get_element(camino, idx + 1)
+            e = G.get_edge(graph, vid, next_id)
+            dist2 = e["weight"] if e else "Unknown"
+        
+        return{
+            "punto_id": vid,
+            "latitud": lat,
+            "longitud": lon,
+            "num_individuos": totIndiv,
+            "primeros_3_individuos": primeros,
+            "ultimos_3_individuos": ultimos,
+            "distancia_anterior": dist1,
+            "distancia_siguiente": dist2
+        }
+    
+    primeros=[]
+    ultimos=[]
+    for i in range(min(5, totV)):
+        primeros.append(formatealo(i))
+    for i in range(max(0, totV-5),totV):
+        ultimos.append(formatealo(i))
+    
+    return{"total_puntos": totV,
+           "total_individuos": totIndiv,
+           "primeros_5": primeros,
+           "ultimos_5": ultimos}
+    
 
 
 def req_4(catalog):
