@@ -41,8 +41,63 @@ def print_req_1(control):
         Función que imprime la solución del Requerimiento 1 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 1
-    pass
+    try:
+        lat_o = float(input("Ingrese latitud de origen: "))
+        lon_o = float(input("Ingrese longitud de origen: "))
+        lat_d = float(input("Ingrese latitud de destino: "))
+        lon_d = float(input("Ingrese longitud de destino: "))
+        individuo = input("Ingrese el identificador del individuo: ")
+    except:
+        print("\nError: parámetros inválidos.")
+        return
 
+    res = lg.req_1(control, lat_o, lon_o, lat_d, lon_d, individuo)
+
+    # Caso sin camino
+    if res is None or "mensaje" in res:
+        print("\n No se encontró un camino viable entre los puntos\n")
+        print("Primer nodo donde aparece el individuo:", res["primer_nodo_del_individuo"])
+        print("Tiempo de ejecución:", res.get("tiempo_ms", "Unknown"), " ms.")
+        return
+
+    print("Requerimiento 1"
+          + "\nPrimer nodo donde aparece el individuo: " + str(res["primer_nodo_del_individuo"])
+          + "\nDistancia total del camino: " + str(res["distancia_total"]) + " km"
+          + "\nTotal de puntos en el camino: " + str(res["total_puntos"])
+          + "\nTiempo de ejecución: " + str(res["tiempo_ms"]) + " ms.")
+
+    # Función para armar la tabla
+    def table(lista):
+        headers = [
+            "ID Punto",
+            "Latitud",
+            "Longitud",
+            "# Individuos",
+            "Primeros 3 individuos",
+            "Últimos 3 individuos",
+            "Distancia siguiente"
+        ]
+
+        filas = []
+        for p in lista:
+            fila = [
+                p["punto_id"],
+                p["latitud"],
+                p["longitud"],
+                p["num_individuos"],
+                ", ".join(str(x) for x in p["primeros_3_individuos"]) if p["primeros_3_individuos"] else "—",
+                ", ".join(str(x) for x in p["ultimos_3_individuos"]) if p["ultimos_3_individuos"] else "—",
+                p["distancia_siguiente"]
+            ]
+            filas.append(fila)
+
+        return tabulate(filas, headers, tablefmt="grid", stralign="center")
+
+    print("\nPrimeros 5:\n")
+    print(table(res["primeros_5"]))
+
+    print("\nÚltimos 5:\n")
+    print(table(res["ultimos_5"]))
 
 def print_req_2(control):
     """
@@ -107,8 +162,56 @@ def print_req_4(control):
         Función que imprime la solución del Requerimiento 4 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 4
-    pass
+    try:
+        lat_o = float(input("Ingrese latitud de origen: "))
+        lon_o = float(input("Ingrese longitud de origen: "))
+    except:
+        print("\nError: parámetros inválidos.")
+        return
 
+    res = lg.req_4(control, lat_o, lon_o)
+
+    # Caso sin red hídrica viable
+    if res is None or "mensaje" in res:
+        print("\n No existe una red hídrica viable desde el origen dado.\n")
+        return
+
+    print("Requerimiento 4"
+          + "\nTotal de puntos en el corredor hídrico: " + str(res["total_puntos"])
+          + "\nTotal de individuos en el corredor: " + str(res["total_individuos"])
+          + "\nDistancia total a fuentes hídricas: " + str(res["distancia_total"]) + " km"
+          + "\nTiempo de ejecución: " + str(res["tiempo_ms"]) + " ms.")
+
+    # Función para armar la tabla
+    def table(lista):
+        headers = [
+            "ID Punto",
+            "Latitud",
+            "Longitud",
+            "# Individuos",
+            "Primeros 3 individuos",
+            "Últimos 3 individuos"
+        ]
+
+        filas = []
+        for p in lista:
+            fila = [
+                p["punto_id"],
+                p["latitud"],
+                p["longitud"],
+                p["num_individuos"],
+                ", ".join(str(x) for x in p["primeros_3_individuos"]) if p["primeros_3_individuos"] else "—",
+                ", ".join(str(x) for x in p["ultimos_3_individuos"]) if p["ultimos_3_individuos"] else "—"
+            ]
+            filas.append(fila)
+
+        return tabulate(filas, headers, tablefmt="grid", stralign="center")
+
+    print("\nPrimeros 5:\n")
+    print(table(res["primeros_5"]))
+
+    print("\nÚltimos 5:\n")
+    print(table(res["ultimos_5"]))
 
 def print_req_5(control):
     """
