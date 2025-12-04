@@ -56,7 +56,48 @@ def print_req_3(control):
     """
         Función que imprime la solución del Requerimiento 3 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 3
+    res = lg.req_3(control)
+    
+    if res == None:
+        print("\n No se encontró una ruta migratoria viable dentro del nicho")
+        return 
+    
+    print("Requerimiento 3"+
+          "\nTotal de puntos en la ruta: "+str(res["total_puntos"])+
+          "\nTotal de individuos en la ruta: "+str(res["total_individuos"]))
+    
+    def table(lista):
+        headers = ["ID Punto",
+            "Latitud",
+            "Longitud",
+            "# Individuos",
+            "Primeros 3 individuos",
+            "Últimos 3 individuos",
+            "Distancia anterior",
+            "Distancia siguiente"
+        ]
+        
+        filas = []
+        for p in lista:
+            fila= [
+                p["punto_id"],
+                p["latitud"],
+                p["longitud"],
+                p["num_individuos"],
+                ", ".join(str(x) for x in p["primeros_3_individuos"]) if p["primeros_3_individuos"] else "—",
+                ", ".join(str(x) for x in p["ultimos_3_individuos"]) if p["ultimos_3_individuos"] else "—",
+                p["distancia_anterior"],
+                p["distancia_siguiente"]
+            ]
+            filas.append(fila)
+        
+        return tabulate(filas, headers, tablefmt="grid", stralign="center")
+        
+    print("Primeros 5:\n")
+    print(table(res["primeros_5"]))
+    
+    print("\nUltimos 5:\n")
+    print(table(res["ultimos_5"]))
     pass
 
 
